@@ -20,7 +20,7 @@ void Callcb(const char* addr) {
 
 int main() {
 	HSIC::Bus bus;
-
+	bus.MultiModule();
 
 
 	//std::future<int> runSerialportThread_;

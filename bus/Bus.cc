@@ -8,22 +8,22 @@
 
 
 HSIC::Bus::Bus() {
-	// 读配置文件
-	if (ReadAppConfig()) {
-		log(info,"Read config success.");
-	}
+	//// 读配置文件
+	//if (ReadAppConfig()) {
+	//	log(info,"Read config success.");
+	//}
 
-	// 数据库初始化
-	pHsiDB = CreateExportObj(config_.dataPath);
-	if (!pHsiDB->Connect(config_.hostName,config_.account,config_.passwd,config_.db,config_.port)) {
-		exit(0);
-	}
-	if (!pHsiDB->Intialize()) {
-		exit(0);
-	}
-	else {
-		log(info, "Intialize HSI database.");
-	}
+	//// 数据库初始化
+	//pHsiDB = CreateExportObj(config_.dataPath);
+	//if (!pHsiDB->Connect(config_.hostName,config_.account,config_.passwd,config_.db,config_.port)) {
+	//	exit(0);
+	//}
+	//if (!pHsiDB->Intialize()) {
+	//	exit(0);
+	//}
+	//else {
+	//	log(info, "Intialize HSI database.");
+	//}
 }
 
 HSIC::Bus::~Bus() {
@@ -49,8 +49,8 @@ bool HSIC::Bus::ReadAppConfig() {
 }
 
 void HSIC::Bus::MultiModule() {
-	
-	
+	//ObjSearch();
+	//ReadRawfile("default")
 
 
 

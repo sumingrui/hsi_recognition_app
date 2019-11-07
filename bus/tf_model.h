@@ -1,6 +1,10 @@
 #pragma once
 #include <string>
+#include <opencv2/opencv.hpp>
 
-bool ReadRaw(std::string filename);
-int Tf_2dcnn(std::string & imgPath);
-int Tf_3dcnn(std::string & imgPath);
+using std::string;
+
+bool ReadRawfile(string rawfilepath, cv::Mat &img_cube);
+bool Draw_gt(string matfilepath, string key);
+int TF_2dcnn(string rawfilepath, string & imgPath);
+int TF_3dcnn(string rawfilepath, string & imgPath);

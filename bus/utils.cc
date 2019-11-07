@@ -15,6 +15,7 @@ void save_imagesc(cv::Mat img, std::string path) {
 	cv::imwrite(path.c_str(), img);
 }
 
+
 cv::Mat norm(cv::Mat mat) {
 	cout << "import normalize ... ..." << endl;
 	double max = 0.0, min = 0.0;
