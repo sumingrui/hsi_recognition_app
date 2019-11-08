@@ -21,6 +21,7 @@ public:
 	virtual bool CheckNewData() = 0;
 	virtual bool InsertOneRow(string) = 0;
 	virtual bool ExportOneRow(string , string &) = 0;
+	virtual string GetTaskfile() = 0;
 	virtual void Release() = 0;
 };
 

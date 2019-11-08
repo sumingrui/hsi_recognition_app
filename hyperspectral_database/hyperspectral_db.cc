@@ -90,11 +90,11 @@ bool SpectralDataSQL::CheckNewData() {
 				continue;
 			}
 			else {
+				std::this_thread::sleep_for(std::chrono::milliseconds(5000));
 				task_file_ = newofiles.back();
 				ofiles_ = newofiles;
 				log(info, "new file: " + task_file_);
 				Intialize();
-				std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 				return TRUE;
 			}
 		}
@@ -143,6 +143,11 @@ bool SpectralDataSQL::ExportOneRow(string infile, string &outfile) {
 		mysql_free_result(res);
 		return TRUE;
 	}
+}
+
+string SpectralDataSQL::GetTaskfile()
+{
+	return task_file_;
 }
 
 

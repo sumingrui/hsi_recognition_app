@@ -69,9 +69,10 @@ bool Draw_gt(string matfilepath, string key) {
 }
 
 
-int TF_2dcnn(string rawfilepath,string & imgPath) {
+int TF_2dcnn(string rawfilepath, string filename, string & sendImgPath) {
 	cv::Mat img_cube = cv::Mat::zeros(lines, samples, CV_64FC(224));
-	
+	rawfilepath = rawfilepath + filename + ".raw";
+
 	if (!ReadRawfile(rawfilepath, img_cube)) {
 		return 0;
 	}
@@ -82,15 +83,7 @@ int TF_2dcnn(string rawfilepath,string & imgPath) {
 	// pad 224->225
 	pad_2dcnn(img_cube);
 
-	//typedef cv::Vec<double, 225> vec225d;
-	//for (int i = 0; i < 100; i++) {	
-	//	std::cout << img_cube.at<vec225d>(0, i)[0] << " ";
-	//}
-
 	img_cube.convertTo(img_cube, CV_32F);
-	//std::cout << img_cube.rows << std::endl;
-	//std::cout << img_cube.cols << std::endl;
-	//std::cout << img_cube.channels() << std::endl;
 
 	//¹¹½¨sess and model
 	Session* session;
@@ -132,14 +125,6 @@ int TF_2dcnn(string rawfilepath,string & imgPath) {
 		}
 	}
 
-	//for (int i = 0; i < 15; i++) {
-	//	for (int j = 0; j < 15; j++) {
-	//		std::cout << input_tensor_mapped(0,i,j,0) << " ";
-	//	}
-	//	std::cout << std::endl;
-	//}
-
-
 	status = session->Run(inputs, { "fc1/Softmax" }, {}, &outputs);
 	if (!status.ok()) {
 		log(LOGLEVEL::error, status.ToString());
@@ -163,11 +148,10 @@ int TF_2dcnn(string rawfilepath,string & imgPath) {
 		img_spectral.at<double>(n/samples, n%samples) = double(class_id);
 	}
 
-
 	//save opencv mat
-	save_xml(img_spectral, "img_spectral.xml");
-	save_imagesc(img_spectral, "img_spectral.jpg");
-	imgPath = "img_spectral.jpg";
+	save_xml(img_spectral, ".//results//" + filename + ".xml");
+	save_imagesc(img_spectral, ".//results//" + filename + ".jpg");
+	sendImgPath = ".//results//" + filename + ".jpg";
 
 	session->Close();
 	
@@ -175,7 +159,7 @@ int TF_2dcnn(string rawfilepath,string & imgPath) {
 }
 
 
-int TF_3dcnn(string rawfilepath, string & imgPath) {
+int TF_3dcnn(string rawfilepath, string filename, string & sendImgPath) {
 
 
 	/*

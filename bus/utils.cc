@@ -54,12 +54,8 @@ void pad_2dcnn(cv::Mat &mat) {
 }
 
 
-
-
-
-
 void save_xml(cv::Mat mat,std::string path) {
 	cv::FileStorage fs(path.c_str(), cv::FileStorage::WRITE);
-	fs << "img_spectral" << mat;
+	fs << "spectral_colormap" << mat;
 	fs.release();
 }

@@ -24,6 +24,7 @@ public:
 	virtual bool CheckNewData();
 	virtual bool InsertOneRow(string filename);
 	virtual bool ExportOneRow(string infile, string &outfile);
+	virtual string GetTaskfile();
 	virtual void Release();
 
 private:

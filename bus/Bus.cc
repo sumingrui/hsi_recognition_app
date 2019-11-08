@@ -8,22 +8,22 @@
 
 
 HSIC::Bus::Bus() {
-	//// 读配置文件
-	//if (ReadAppConfig()) {
-	//	log(info,"Read config success.");
-	//}
+	// 读配置文件
+	if (ReadAppConfig()) {
+		log(info,"Read config success.");
+	}
 
-	//// 数据库初始化
-	//pHsiDB = CreateExportObj(config_.dataPath);
-	//if (!pHsiDB->Connect(config_.hostName,config_.account,config_.passwd,config_.db,config_.port)) {
-	//	exit(0);
-	//}
-	//if (!pHsiDB->Intialize()) {
-	//	exit(0);
-	//}
-	//else {
-	//	log(info, "Intialize HSI database.");
-	//}
+	// 数据库初始化
+	pHsiDB = CreateExportObj(config_.dataPath);
+	if (!pHsiDB->Connect(config_.hostName,config_.account,config_.passwd,config_.db,config_.port)) {
+		exit(0);
+	}
+	if (!pHsiDB->Intialize()) {
+		exit(0);
+	}
+	else {
+		log(info, "Intialize HSI database.");
+	}
 }
 
 HSIC::Bus::~Bus() {
@@ -41,7 +41,7 @@ bool HSIC::Bus::ReadAppConfig() {
 	GetPrivateProfileString("Database", "Account", "root", config_.account, 20, ".//settings.ini");
 	GetPrivateProfileString("Database", "Passwd", "123456", config_.passwd, 20, ".//settings.ini");
 	GetPrivateProfileString("Database", "DB", "smr", config_.db, 20, ".//settings.ini");
-	GetPrivateProfileString("Database", "DataPath", "H:\\hyperspectral_database\\", config_.dataPath, 128, ".//settings.ini");
+	GetPrivateProfileString("Database", "DataPath", "H://hyperspectral_database//", config_.dataPath, 128, ".//settings.ini");
 	config_.port = GetPrivateProfileInt("Database", "Port", 3306, ".//settings.ini");
 	config_.speed_level = GetPrivateProfileInt("Algorithm", "speed_level", 2, ".//settings.ini");
 
@@ -49,9 +49,9 @@ bool HSIC::Bus::ReadAppConfig() {
 }
 
 void HSIC::Bus::MultiModule() {
-	//ObjSearch();
-	string imgpath;
-	TF_2dcnn(".//dataset//rawdata//newrawSinglefile20190711140909.raw", imgpath);
+	// 算法
+	ObjSearch();
+	
 
 
 
@@ -61,7 +61,8 @@ void HSIC::Bus::ObjSearch() {
 	while (TRUE) {
 		// 监控新数据
 		if (pHsiDB->CheckNewData()) {
-			// 选择算法
+			string sendImgPath;
+			// 选择算法，读取参数（如果有更新）
 			config_.speed_level = GetPrivateProfileInt("Algorithm", "speed_level", 2, ".//settings.ini");
 			switch (config_.speed_level)
 			{
@@ -74,7 +75,8 @@ void HSIC::Bus::ObjSearch() {
 			case 2:
 				// middle
 				log(info, "Choose algorithm speed 2.");
-
+				TF_2dcnn(config_.dataPath,pHsiDB->GetTaskfile(), sendImgPath);
+				std::cout << sendImgPath << std::endl;
 				break;
 
 			case 3:
@@ -88,8 +90,6 @@ void HSIC::Bus::ObjSearch() {
 				break;
 			}
 			
-
-
 			// 详查算法
 
 
