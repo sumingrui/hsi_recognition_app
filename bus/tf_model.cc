@@ -23,7 +23,7 @@ bool ReadRawfile(string rawfilepath, cv::Mat &img_cube)
 {
 	FILE *rawfile;
 	img_cube = cv::Mat::zeros(lines, samples, CV_64FC(224));
-	rawfile = fopen(".//dataset//rawdata//newrawSinglefile20190711140928.raw", "rb");
+	rawfile = fopen(rawfilepath.c_str(), "rb");
 	if (rawfile != NULL) {
 		for (int h = 0; h < lines; h++) {
 			fseek(rawfile, h*samples*bands*2, SEEK_SET);
@@ -36,11 +36,11 @@ bool ReadRawfile(string rawfilepath, cv::Mat &img_cube)
 			}
 		}
 		fclose(rawfile);
-		
+		log(info, "load raw file success: " + rawfilepath);
 		return TRUE;
 	}
 	else {
-		// log
+		log(warnning, "load raw file failed: " + rawfilepath);
 		return false;
 	}
 }
@@ -65,7 +65,7 @@ bool Draw_gt(string matfilepath, string key) {
 		}
 	}
 	save_imagesc(img_gt, "img_gt.jpg");
-	// log
+	log(info, "Draw ground truth: img_gt.jpg");
 }
 
 
@@ -73,116 +73,104 @@ int TF_2dcnn(string rawfilepath,string & imgPath) {
 	cv::Mat img_cube = cv::Mat::zeros(lines, samples, CV_64FC(224));
 	
 	if (!ReadRawfile(rawfilepath, img_cube)) {
-		// log fail
 		return 0;
 	}
 	
 	// norm
 	img_cube = norm(img_cube);
 
-	// 先reshape 再pad
-	
+	// pad 224->225
+	pad_2dcnn(img_cube);
 
+	//typedef cv::Vec<double, 225> vec225d;
+	//for (int i = 0; i < 100; i++) {	
+	//	std::cout << img_cube.at<vec225d>(0, i)[0] << " ";
+	//}
 
+	img_cube.convertTo(img_cube, CV_32F);
+	//std::cout << img_cube.rows << std::endl;
+	//std::cout << img_cube.cols << std::endl;
+	//std::cout << img_cube.channels() << std::endl;
 
-
-
-	//img_cube = pad_2dcnn(img_cube);
-
-	/*
-	// bf and pad
-	// todo： 增加参数配置文件
-	// int kernel_size = 5;
-	cv::Mat img_bf;
-	// img_bf = bf_pad(img_cube, d, kernel_size);
-
-
-	
-
-	// 构建sess and model
+	//构建sess and model
 	Session* session;
 	Status status = NewSession(SessionOptions(), &session);
 	if (!status.ok()) {
-		cout << status.ToString() << "\n";
-		return 1;
+		log(LOGLEVEL::error, status.ToString());
+		return 0;
 	}
 
 	GraphDef graph_def;
-	status = ReadBinaryProto(Env::Default(), "resnet_v1.pb", &graph_def);
+	status = ReadBinaryProto(Env::Default(), "2dcnn.pb", &graph_def);
 	if (!status.ok()) {
-		cout << status.ToString() << "\n";
-		return 1;
+		log(LOGLEVEL::error, status.ToString());
+		return 0;
 	}
 
 	status = session->Create(graph_def);
 	if (!status.ok()) {
-		cout << status.ToString() << "\n";
+		log(LOGLEVEL::error, status.ToString());
 		return 1;
 	}
 
 	vector<std::pair<string, Tensor>> inputs;
 	vector<Tensor> outputs;
 
-	cv::Mat img_spectral = cv::Mat::zeros(w, h, CV_64FC1);
-
 	// 赋值给tensor
-	// todo: 增加多个tensorflow cv矩阵
-	typedef cv::Vec<float, 200> vec200f;
-	Tensor input_tensor(DT_FLOAT, TensorShape({ w,kernel_size,kernel_size,d,1 }));
-	auto input_tensor_mapped = input_tensor.tensor<float, 5>();
+	typedef cv::Vec<float, 225> vec225f;
+	Tensor input_tensor(DT_FLOAT, TensorShape({ lines*samples,15,15,1 }));
+	auto input_tensor_mapped = input_tensor.tensor<float, 4>();
+
 	inputs = { {"input_1",input_tensor} };
 
-	for (int nRow = 0; nRow < h; nRow++) {
-		for (int nCol = 0; nCol < w; nCol++) {
-			for (int kw = 0; kw < kernel_size; kw++) {
-				for (int kh = 0; kh < kernel_size; kh++) {
-					for (int nDepth = 0; nDepth < d; nDepth++) {
-						input_tensor_mapped(nCol, kw, kh, nDepth, 0) =
-							img_bf.at<vec200f>(nRow + kw, nCol + kh)[nDepth];
-					}
-				}
-			}
-		}
-
-		status = session->Run(inputs, { "dense_1/Softmax" }, {}, &outputs);
-		if (!status.ok()) {
-			cout << status.ToString() << endl;
-		}
-		else {
-			cout << "complete " << std::setprecision(4) << double(nRow + 1) / double(h) * 100 << "%" << endl;
-		}
-
-		auto output = outputs[0].tensor<float, 2>();
-		int output_num = outputs[0].shape().dim_size(0);
-		int output_dim = outputs[0].shape().dim_size(1);
-
-		for (int n = 0; n < output_num; n++) {
-			double output_prob = 0.0;
-			double class_id = 0.0;
-			for (int j = 0; j < output_dim; j++) {
-				if (output(n, j) >= output_prob) {
-					class_id = j;
-					output_prob = output(n, j);
-				}
-			}
-			if (img_gt.at<double>(nRow, n) != 0.0) {
-				img_spectral.at<double>(nRow, n) = double(class_id + 1);
+	for (int nRow = 0; nRow < lines; nRow++) {
+		for (int nCol = 0; nCol < samples; nCol++) {
+			for (int nChannel = 0; nChannel < 225; nChannel++) {
+				input_tensor_mapped(nRow*samples + nCol, nChannel / 15, nChannel % 15, 0) =
+					img_cube.at<vec225f>(nRow,nCol)[nChannel];
 			}
 		}
 	}
 
-	mxDestroyArray(pMxArray1);
-	mxDestroyArray(pMxArray2);
-	matClose(pMatFile1);
-	matClose(pMatFile2);
+	//for (int i = 0; i < 15; i++) {
+	//	for (int j = 0; j < 15; j++) {
+	//		std::cout << input_tensor_mapped(0,i,j,0) << " ";
+	//	}
+	//	std::cout << std::endl;
+	//}
 
-	// save opencv mat
+
+	status = session->Run(inputs, { "fc1/Softmax" }, {}, &outputs);
+	if (!status.ok()) {
+		log(LOGLEVEL::error, status.ToString());
+	}
+
+	auto output = outputs[0].tensor<float, 2>();
+	int output_num = outputs[0].shape().dim_size(0);
+	int output_dim = outputs[0].shape().dim_size(1);
+	
+	cv::Mat img_spectral = cv::Mat::zeros(lines, samples, CV_64FC1);
+
+	for (int n = 0; n < output_num; n++) {
+		double output_prob = 0.0;
+		double class_id = 0.0;
+		for (int j = 0; j < output_dim; j++) {
+			if (output(n, j) >= output_prob) {
+				class_id = j;
+				output_prob = output(n, j);
+			}
+		}
+		img_spectral.at<double>(n/samples, n%samples) = double(class_id);
+	}
+
+
+	//save opencv mat
 	save_xml(img_spectral, "img_spectral.xml");
 	save_imagesc(img_spectral, "img_spectral.jpg");
 	imgPath = "img_spectral.jpg";
 
 	session->Close();
-	*/
+	
 	return 0;
 }
 

@@ -46,11 +46,11 @@ cv::Mat bf_pad(cv::Mat mat,int nChannels,int kernel_size) {
 
 // 2dcnn_pad
 void pad_2dcnn(cv::Mat &mat) {
-	cv::Mat single_zero_pad = cv::Mat::zeros(mat.size().height, mat.size().width, CV_64FC1);
-	vector<cv::Mat> img_pad;
-	img_pad.push_back(mat);
-	img_pad.push_back(single_zero_pad);
-	cv::merge(img_pad, mat);
+	cv::Mat single_zero_pad = cv::Mat::zeros(mat.rows, mat.cols, CV_64FC1);
+	vector<cv::Mat> single_channels(224);
+	cv::split(mat, single_channels);
+	single_channels.push_back(single_zero_pad);
+	cv::merge(single_channels, mat);
 }
 
 

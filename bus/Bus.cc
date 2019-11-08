@@ -50,7 +50,8 @@ bool HSIC::Bus::ReadAppConfig() {
 
 void HSIC::Bus::MultiModule() {
 	//ObjSearch();
-	//ReadRawfile("default")
+	string imgpath;
+	TF_2dcnn(".//dataset//rawdata//newrawSinglefile20190711140909.raw", imgpath);
 
 
 
