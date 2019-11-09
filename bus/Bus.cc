@@ -76,7 +76,7 @@ void HSIC::Bus::ObjSearch() {
 				// middle
 				log(info, "Choose algorithm speed 2.");
 				TF_2dcnn(config_.dataPath,pHsiDB->GetTaskfile(), sendImgPath);
-				std::cout << sendImgPath << std::endl;
+				log(info, "save recognition image: "+ sendImgPath);
 				break;
 
 			case 3:

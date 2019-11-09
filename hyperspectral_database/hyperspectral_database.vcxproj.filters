@@ -10,9 +10,6 @@
     <ClCompile Include="hyperspectral_db.cc">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="MySQLtest.cc">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\share\share.cc">
       <Filter>资源文件</Filter>
     </ClCompile>

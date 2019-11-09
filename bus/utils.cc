@@ -17,7 +17,6 @@ void save_imagesc(cv::Mat img, std::string path) {
 
 
 cv::Mat norm(cv::Mat mat) {
-	cout << "import normalize ... ..." << endl;
 	double max = 0.0, min = 0.0;
 	cv::minMaxIdx(mat, &min, &max);
 	mat = (mat - min) / (max - min);
@@ -26,7 +25,6 @@ cv::Mat norm(cv::Mat mat) {
 
 // todo: ·ÖÀëbfºÍpad
 cv::Mat bf_pad(cv::Mat mat,int nChannels,int kernel_size) {
-	cout << "import bf ... ..." << endl;
 	cv::Mat img_bf;
 	mat.convertTo(img_bf, CV_32F);
 	vector<cv::Mat> single_channel(nChannels);

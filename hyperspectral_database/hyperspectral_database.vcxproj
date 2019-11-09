@@ -165,7 +165,6 @@
     <ClCompile Include="..\share\share.cc" />
     <ClCompile Include="db_base.cc" />
     <ClCompile Include="hyperspectral_db.cc" />
-    <ClCompile Include="MySQLtest.cc" />
     <ClCompile Include="tools.cc" />
   </ItemGroup>
   <ItemGroup>
